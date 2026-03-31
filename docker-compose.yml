@@ -24,6 +24,8 @@ services:
     mem_limit: 512m
     cpus: '0.5'
     restart: unless-stopped
+    networks:
+      - backend_net
     <<: *logging-default
 
   stats-api:
@@ -41,6 +43,8 @@ services:
     mem_limit: 256m
     cpus: '0.5'
     restart: unless-stopped
+    networks:
+      - backend_net
     <<: *logging-default
 
   nginx:
@@ -55,6 +59,9 @@ services:
     mem_limit: 128m
     cpus: '0.3'
     restart: unless-stopped
+    networks:
+      - frontend_net
+      - backend_net
     <<: *logging-default
 
   frontend:
@@ -62,6 +69,8 @@ services:
     mem_limit: 64m
     cpus: '0.2'
     restart: unless-stopped
+    networks:
+      - frontend_net
     <<: *logging-default
 
   color-api:
@@ -73,6 +82,8 @@ services:
     mem_limit: 256m
     cpus: '0.5'
     restart: unless-stopped
+    networks:
+      - backend_net
     <<: *logging-default
 
   health-api:
@@ -86,6 +97,8 @@ services:
     mem_limit: 128m
     cpus: '0.3'
     restart: unless-stopped
+    networks:
+      - backend_net
     <<: *logging-default
 
   redis:
@@ -93,7 +106,15 @@ services:
     mem_limit: 128m
     cpus: '0.3'
     restart: unless-stopped
+    networks:
+      - backend_net
     <<: *logging-default
 
 volumes:
   postgres_data:
+
+networks:
+  frontend_net:
+    driver: bridge
+  backend_net:
+    driver: bridge
