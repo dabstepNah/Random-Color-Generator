@@ -1,5 +1,12 @@
 version: '3.8'
 
+x-logging-default: &logging-default
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   db:
     image: postgres:15
@@ -14,6 +21,10 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    mem_limit: 512m
+    cpus: '0.5'
+    restart: unless-stopped
+    <<: *logging-default
 
   stats-api:
     build: ./services/stats-api
@@ -27,6 +38,10 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+    mem_limit: 256m
+    cpus: '0.5'
+    restart: unless-stopped
+    <<: *logging-default
 
   nginx:
     build: ./nginx
@@ -37,9 +52,17 @@ services:
       - color-api
       - stats-api
       - health-api
+    mem_limit: 128m
+    cpus: '0.3'
+    restart: unless-stopped
+    <<: *logging-default
 
   frontend:
     build: ./services/frontend
+    mem_limit: 64m
+    cpus: '0.2'
+    restart: unless-stopped
+    <<: *logging-default
 
   color-api:
     build: ./services/color-api
@@ -47,18 +70,30 @@ services:
       - FLASK_APP=app.py
     depends_on:
       - redis
+    mem_limit: 256m
+    cpus: '0.5'
+    restart: unless-stopped
+    <<: *logging-default
 
   health-api:
     build: ./services/health-api
     environment:
-    - DB_URL=${DATABASE_URL}
+      - DB_URL=${DATABASE_URL}
     depends_on:
       - color-api
       - stats-api
       - db
+    mem_limit: 128m
+    cpus: '0.3'
+    restart: unless-stopped
+    <<: *logging-default
 
   redis:
     image: redis:alpine
+    mem_limit: 128m
+    cpus: '0.3'
+    restart: unless-stopped
+    <<: *logging-default
 
 volumes:
   postgres_data:
