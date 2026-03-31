@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Random Colors</title>
+    <style>
+        .color-box {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #stats {
+            margin-top: 20px;
+            text-align: left;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Color Generator</h1>
+    <div class="color-box" id="colorBox"></div>
+    <div id="colorName"></div>
+    <button id="randomBtn">Random color</button>
+
+    <h2>Static</h2>
+    <pre id="stats"></pre>
+
+    <script>
+        async function getRandomColor() {
+            const res = await fetch('/api/random');
+            const color = await res.json();
+            document.getElementById('colorBox').style.backgroundColor = color.hex;
+            document.getElementById('colorName').innerHTML = `<h2>${color.name}</h2>`;
+            await fetch('/api/stats/record', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: color.name, hex: color.hex})
+            });
+            loadStats();
+        }
+
+        async function loadStats() {
+            const res = await fetch('/api/stats');
+            const stats = await res.json();
+            document.getElementById('stats').innerText = JSON.stringify(stats, null, 2);
+        }
+
+        document.getElementById('randomBtn').onclick = getRandomColor;
+        getRandomColor();
+        loadStats();
+    </script>
+</body>
+</html>

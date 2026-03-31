@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: colors
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  stats-api:
+    build: ./services/stats-api
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/colors
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - color-api
+      - stats-api
+      - health-api
+
+  frontend:
+    build: ./services/frontend
+
+  color-api:
+    build: ./services/color-api
+    environment:
+      - FLASK_APP=app.py
+    depends_on:
+      - redis
+
+  health-api:
+    build: ./services/health-api
+    environment:
+      - COLOR_API_URL=http://color-api:5000/random
+      - STATS_API_URL=http://stats-api:5001/stats
+      - DB_URL=postgresql://user:pass@db:5432/colors
+    depends_on:
+      - color-api
+      - stats-api
+      - db
+
+  redis:
+    image: redis:alpine
+
+volumes:
+  postgres_data:
