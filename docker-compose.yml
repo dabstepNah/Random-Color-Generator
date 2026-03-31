@@ -4,9 +4,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: colors
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -18,7 +18,7 @@ services:
   stats-api:
     build: ./services/stats-api
     environment:
-      - DATABASE_URL=postgresql://user:pass@db:5432/colors
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       db:
         condition: service_healthy
@@ -51,9 +51,7 @@ services:
   health-api:
     build: ./services/health-api
     environment:
-      - COLOR_API_URL=http://color-api:5000/random
-      - STATS_API_URL=http://stats-api:5001/stats
-      - DB_URL=postgresql://user:pass@db:5432/colors
+    - DB_URL=${DATABASE_URL}
     depends_on:
       - color-api
       - stats-api
