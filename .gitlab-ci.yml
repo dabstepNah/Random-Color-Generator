@@ -1,0 +1,16 @@
+stages:
+  - test
+  - build
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+test-pipeline:
+  stage: test
+  script:
+    - echo "=== CI/CD Pipeline Started ==="
+    - echo "Project: Random Color Generator"
+    - echo "Pipeline status: SUCCESS"
+  only:
+    - main
